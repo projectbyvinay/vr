@@ -22,3 +22,21 @@ button{font:inherit}.grain{position:fixed;inset:0;z-index:60;pointer-events:none
 .dock{position:fixed;z-index:68;right:22px;bottom:22px;display:flex;gap:7px}.dock button{width:42px;height:42px;border-radius:50%;border:1px solid #fff3;background:#4c1d3d99;color:#fff;backdrop-filter:blur(12px);cursor:pointer}.lightbox{position:fixed;inset:0;z-index:90;background:#160510ee;display:none;place-items:center;padding:5vw}.lightbox.show{display:grid}.lightbox img{max-width:min(900px,90vw);max-height:82vh;border-radius:12px;box-shadow:0 30px 100px #000}.lightbox #lightbox-title{position:absolute;bottom:5vh;font:25px var(--script);color:var(--c1)}.close-lightbox{position:absolute;right:25px;top:20px;background:none;border:0;color:#fff;font-size:40px;cursor:pointer}
 @media(max-width:760px){.topbar{padding:17px 15px;font-size:7px}.hero h1{font-size:105px}.scene{height:105svh;min-height:690px}.scene-copy h2{font-size:65px}.split-moment{grid-template-columns:1fr;padding:12vh 8vw}.mini-card{justify-self:center;width:min(380px,80vw)}.split-text{text-align:center}.split-text .quote-script{font-size:80px}.memory-track article{width:275px;height:210px}.memory-strip{padding-top:12vh}.final-content h2{font-size:105px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+/* Mobile memory cards: keep every card fully inside the screen */
+@media(max-width:760px){
+  .memory-track{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+    width:100%;
+    padding:0 8vw;
+  }
+
+  .memory-track article{
+    width:100%;
+    max-width:420px;
+    height:auto;
+    min-height:210px;
+  }
+}
