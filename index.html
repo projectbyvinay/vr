@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#4C1D3D">
+<title>Vinay × Ritiksha — Our Story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="loader"><div class="loader-name">Vinay <span>×</span> Ritiksha</div><div class="loader-copy">loading our little film</div><div class="loader-bar"><i></i></div></div>
+<div class="grain"></div>
+<div class="scroll-progress"><i></i></div>
+<header class="topbar"><span>V × R</span><span>OUR LITTLE FILM</span><span id="chapter">01 / 05</span></header>
+
+<main>
+<section class="hero" id="home">
+  <div class="hearts" aria-hidden="true"></div>
+  <div class="hero-orb orb-a"></div><div class="hero-orb orb-b"></div>
+  <div class="hero-content">
+    <div class="kicker">a story written in little moments</div>
+    <h1><span>Vinay</span><b>×</b><span>Ritiksha</span></h1>
+    <p>Somewhere between an ordinary day and an unforgettable one.</p>
+    <button class="begin" data-scroll="#scene-1">Begin the story <span>↓</span></button>
+  </div>
+  <div class="scroll-label">scroll slowly</div>
+</section>
+
+<section class="quote-panel">
+  <div class="quote-script">It started softly…</div>
+  <h2>and somehow became<br><em>everything.</em></h2>
+  <p>Not a perfect story. Just a collection of real moments, ridiculous smiles, rainy days and reasons to stay a little closer.</p>
+</section>
+
+<section class="scene" id="scene-1" data-index="01">
+  <div class="photo" style="--img:url('photos/01-misty-dip.jpg')"></div><div class="veil"></div>
+  <div class="scene-copy"><small>CHAPTER I · THE MOMENT</small><h2>And then,<br>there was us.</h2><p>“Somewhere between the mist and the moment, I found a place that felt like home.”</p><span class="meta">MIST · MEMORY · US</span></div>
+</section>
+
+<section class="scene scene-right" id="scene-2" data-index="02">
+  <div class="photo" style="--img:url('photos/02-misty-kiss.jpg')"></div><div class="veil"></div>
+  <div class="scene-copy"><small>CHAPTER II · THE PAUSE</small><h2>Stay here.<br>Just a little longer.</h2><p>“Some kisses become memories. This one became a chapter.”</p><span class="meta">A QUIET SECOND · FOREVER</span></div>
+</section>
+
+<section class="memory-strip">
+  <div class="strip-label">A FEW THINGS WE NEVER WANT TO FORGET</div>
+  <div class="memory-track">
+    <article><span>01</span><strong>the way you laugh</strong><i>especially when nothing is funny.</i></article>
+    <article><span>02</span><strong>the stolen glances</strong><i>the ones nobody else notices.</i></article>
+    <article><span>03</span><strong>the rainy days</strong><i>somehow, they became our days.</i></article>
+    <article><span>04</span><strong>the little chaos</strong><i>our favourite kind of perfect.</i></article>
+  </div>
+</section>
+
+<section class="scene rain" id="scene-3" data-index="03">
+  <div class="photo" style="--img:url('photos/03-rainy-kiss.jpg')"></div><div class="veil"></div>
+  <div class="scene-copy"><small>CHAPTER III · RAINY DAYS</small><h2>Even the rain<br>had a soft spot for us.</h2><p>“Wet roads, messy hair, and a moment worth remembering.”</p><span class="meta">RAIN · LAUGHTER · KISS</span></div>
+</section>
+
+<section class="split-moment">
+  <div class="split-text"><div class="quote-script">you + me</div><h2>Two people.<br><em>A thousand tiny memories.</em></h2><p>The places change. The weather changes. The photographs change. Somehow, the feeling keeps finding its way back.</p></div>
+  <div class="mini-card"><img src="photos/04-cheek-kiss.jpg" alt="Vinay and Ritiksha sharing a playful moment"><button class="open-lightbox" data-img="photos/04-cheek-kiss.jpg" data-title="A favourite frame">view frame ↗</button></div>
+</section>
+
+<section class="scene soft" id="scene-4" data-index="04">
+  <div class="photo" style="--img:url('photos/04-cheek-kiss.jpg')"></div><div class="veil"></div>
+  <div class="scene-copy"><small>CHAPTER IV · THE SMILE</small><h2>Your smile makes<br>ordinary feel cinematic.</h2><p>“There are moments I wish I could fold up and keep in my pocket forever.”</p><span class="meta">A FAVOURITE FRAME</span></div>
+</section>
+
+<section class="scene deep" id="scene-5" data-index="05">
+  <div class="photo" style="--img:url('photos/05-heart-hands.jpg')"></div><div class="veil"></div>
+  <div class="scene-copy"><small>CHAPTER V · OUR UNIVERSE</small><h2>Two hands.<br>One little universe.</h2><p>“If home is a feeling, then somehow, it looks a lot like this.”</p><span class="meta">ALWAYS · IN ALL WAYS</span></div>
+</section>
+
+<section class="finale" id="finale">
+  <div class="final-ring r1"></div><div class="final-ring r2"></div>
+  <div class="final-content">
+    <small>THE STORY KEEPS GOING</small>
+    <h2>Vinay <b>×</b> Ritiksha</h2>
+    <p>and this is only one chapter.</p>
+    <button class="replay" data-scroll="#home">↻ replay our film</button>
+  </div>
+</section>
+</main>
+
+<div class="lightbox" aria-hidden="true"><button class="close-lightbox">×</button><img id="lightbox-img" alt=""><div id="lightbox-title"></div></div>
+<div class="dock"><button id="sound" title="Ambient mode">♫</button><button data-scroll="#home" title="Top">↑</button></div>
+
+<script src="script.js"></script>
+</body>
+</html>
