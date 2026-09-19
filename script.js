@@ -1,272 +1,162 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
-
 /* =========================================================
-   START WEBSITE
+   FAST LOADER
+   Loader does NOT wait for images/video/window.load
    ========================================================= */
 
-window.addEventListener("load", () => {
-
-  /* =======================================================
-     LOADER
-     
-     Maximum visible time: 1 second.
-     It does NOT wait for anything else after page load.
-     ======================================================= */
-
+(() => {
   const loader = $(".loader");
   const loaderBar = $(".loader-bar i");
 
-  if (loader) {
+  if (!loader) return;
 
-    if (loaderBar) {
+  if (loaderBar) {
+    requestAnimationFrame(() => {
       loaderBar.style.width = "100%";
-    }
-
-    setTimeout(() => {
-
-      loader.style.transition =
-        "opacity 0.2s ease";
-
-      loader.style.opacity = "0";
-
-      loader.style.pointerEvents = "none";
-
-      setTimeout(() => {
-
-        if (loader && loader.parentNode) {
-          loader.remove();
-        }
-
-      }, 200);
-
-    }, 800);
+    });
   }
 
+  // Start immediately — maximum about 1 second
+  setTimeout(() => {
+    loader.style.opacity = "0";
+    loader.style.pointerEvents = "none";
+
+    setTimeout(() => {
+      loader.remove();
+    }, 220);
+  }, 700);
+})();
+
+
+/* =========================================================
+   APP INITIALIZATION
+   ========================================================= */
+
+function initApp() {
 
   /* =======================================================
      FLOATING HEARTS
-     
-     Reduced from 34 to 14 for smoother scrolling.
+     Reduced from heavy amount to 10
      ======================================================= */
 
-  const hearts = $(".global-hearts");
+  const heartLayer = $(".hearts");
 
-  if (hearts) {
+  if (heartLayer) {
+    const heartCount = 10;
 
-    for (let i = 0; i < 14; i++) {
-
-      const heart =
-        document.createElement("span");
+    for (let i = 0; i < heartCount; i++) {
+      const heart = document.createElement("span");
 
       heart.className = "heart";
+      heart.innerHTML = "♡";
 
-      heart.textContent =
-        Math.random() > 0.28
-          ? "♡"
-          : "♥";
+      heart.style.left = `${Math.random() * 100}%`;
+      heart.style.animationDelay = `${Math.random() * 6}s`;
+      heart.style.animationDuration = `${5 + Math.random() * 4}s`;
+      heart.style.fontSize = `${10 + Math.random() * 14}px`;
 
-      heart.style.left =
-        Math.random() * 100 + "%";
-
-      heart.style.fontSize =
-        9 + Math.random() * 19 + "px";
-
-      heart.style.animationDuration =
-        8 + Math.random() * 11 + "s";
-
-      heart.style.animationDelay =
-        -Math.random() * 15 + "s";
-
-      heart.style.setProperty(
-        "--drift",
-        Math.random() * 180 - 90 + "px"
-      );
-
-      hearts.appendChild(heart);
+      heartLayer.appendChild(heart);
     }
   }
 
 
   /* =======================================================
-     SCROLL BUTTONS
+     SMOOTH SCROLL
      ======================================================= */
 
-  $$("[data-scroll]").forEach(button => {
+  $$('a[href^="#"]').forEach(link => {
+    link.addEventListener("click", e => {
+      const id = link.getAttribute("href");
 
-    button.addEventListener("click", () => {
+      if (!id || id === "#") return;
 
-      const target =
-        $(button.dataset.scroll);
+      const target = $(id);
 
-      if (target) {
+      if (!target) return;
 
-        target.scrollIntoView({
-          behavior: "smooth",
-          block: "start"
-        });
+      e.preventDefault();
 
-      }
-
+      target.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
     });
-
   });
 
 
   /* =======================================================
      SCROLL PROGRESS + CHAPTER + PARALLAX
-     
-     One requestAnimationFrame loop handles everything.
+     ONE REQUESTANIMATIONFRAME LOOP
      ======================================================= */
 
-  const progress =
-    $(".scroll-progress i");
-
-  const chapter =
-    $("#chapter");
-
-  const scenes =
-    $$(".scene");
+  const progress = $(".progress");
+  const scenes = $$(".scene");
+  const photos = $$(".photo");
 
   let ticking = false;
 
-
   function updateScroll() {
 
-    /* -----------------------------------------------------
-       Scroll progress
-       ----------------------------------------------------- */
+    const scrollTop = window.scrollY;
+    const docHeight =
+      document.documentElement.scrollHeight - window.innerHeight;
 
-    const max =
-      Math.max(
-        1,
-        document.documentElement.scrollHeight -
-        window.innerHeight
-      );
-
+    const percentage =
+      docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
 
     if (progress) {
-
-      progress.style.width =
-        Math.min(
-          100,
-          window.scrollY / max * 100
-        ) + "%";
-
+      progress.style.width = `${percentage}%`;
     }
 
-
     /* -----------------------------------------------------
-       Active chapter
-       ----------------------------------------------------- */
-
-    let active = "01";
-
-
-    /* -----------------------------------------------------
-       Scene parallax
+       Parallax
+       Only process scenes near the viewport
        ----------------------------------------------------- */
 
     scenes.forEach(scene => {
 
-      const rect =
-        scene.getBoundingClientRect();
+      const rect = scene.getBoundingClientRect();
 
+      const nearViewport =
+        rect.bottom > -window.innerHeight &&
+        rect.top < window.innerHeight * 1.5;
 
-      /*
-       * Only calculate expensive effects for scenes
-       * close to the viewport.
-       */
-
-      const near =
-        rect.bottom >
-          -window.innerHeight * 0.25 &&
-        rect.top <
-          window.innerHeight * 1.25;
-
-
-      if (!near) {
-
-        scene.classList.remove(
-          "is-near"
-        );
-
+      if (!nearViewport) {
+        scene.classList.remove("is-near");
         return;
       }
 
+      scene.classList.add("is-near");
 
-      scene.classList.add(
-        "is-near"
-      );
+      const photo = $(".photo", scene);
 
+      if (!photo) return;
 
-      /* Active chapter detection */
+      const center =
+        rect.top + rect.height / 2;
 
-      if (
-        rect.top <
-          window.innerHeight * 0.58 &&
-        rect.bottom >
-          window.innerHeight * 0.38
-      ) {
+      const distance =
+        center - window.innerHeight / 2;
 
-        active =
-          scene.dataset.index || "01";
+      const movement =
+        Math.max(-36, Math.min(36, distance * -0.045));
 
-      }
-
-
-      /* Image parallax */
-
-      const photo =
-        scene.querySelector(".photo");
-
-
-      if (photo) {
-
-        const n =
-          (window.innerHeight - rect.top) /
-          (window.innerHeight + rect.height);
-
-
-        const movement =
-          (n - 0.5) * 36;
-
-
-        photo.style.transform =
-          `scale(1.045) translate3d(0, ${movement}px, 0)`;
-
-      }
-
+      photo.style.transform =
+        `translate3d(0, ${movement}px, 0) scale(1.045)`;
     });
-
-
-    if (chapter) {
-
-      chapter.textContent =
-        active + " / 05";
-
-    }
-
 
     ticking = false;
   }
 
-
   function requestScrollUpdate() {
 
     if (!ticking) {
-
+      requestAnimationFrame(updateScroll);
       ticking = true;
-
-      requestAnimationFrame(
-        updateScroll
-      );
-
     }
-
   }
-
 
   window.addEventListener(
     "scroll",
@@ -274,132 +164,60 @@ window.addEventListener("load", () => {
     { passive: true }
   );
 
-
-  window.addEventListener(
-    "resize",
-    requestScrollUpdate,
-    { passive: true }
-  );
-
-
-  /* Initial calculation */
-
   updateScroll();
 
 
   /* =======================================================
-     SCENE VISIBILITY OBSERVER
+     SCENE REVEAL
      ======================================================= */
 
-  const sceneObserver =
-    new IntersectionObserver(
-      entries => {
+  const sceneObserver = new IntersectionObserver(
+    entries => {
 
-        entries.forEach(entry => {
+      entries.forEach(entry => {
 
-          entry.target.classList.toggle(
-            "is-visible",
-            entry.isIntersecting
-          );
+        if (entry.isIntersecting) {
+          entry.target.classList.add("show");
+        }
 
-        });
+      });
 
-      },
-      {
-        rootMargin:
-          "20% 0px 20% 0px",
-
-        threshold: 0
-      }
-    );
-
+    },
+    {
+      threshold: 0.15,
+      rootMargin: "0px 0px -8% 0px"
+    }
+  );
 
   scenes.forEach(scene => {
-
-    sceneObserver.observe(
-      scene
-    );
-
+    sceneObserver.observe(scene);
   });
 
 
   /* =======================================================
-     SCENE TEXT REVEAL
+     TEXT / COPY REVEAL
      ======================================================= */
 
-  const copyObserver =
-    new IntersectionObserver(
-      entries => {
+  const copyObserver = new IntersectionObserver(
+    entries => {
 
-        entries.forEach(entry => {
+      entries.forEach(entry => {
 
-          if (!entry.isIntersecting) {
-            return;
-          }
+        if (entry.isIntersecting) {
+          entry.target.classList.add("revealed");
+          copyObserver.unobserve(entry.target);
+        }
 
+      });
 
-          const copy =
-            entry.target.querySelector(
-              ".scene-copy"
-            );
+    },
+    {
+      threshold: 0.15
+    }
+  );
 
-
-          if (copy) {
-
-            copy.animate(
-
-              [
-                {
-                  opacity: 0,
-                  transform:
-                    "translateY(35px)"
-                },
-
-                {
-                  opacity: 1,
-                  transform:
-                    "translateY(0)"
-                }
-              ],
-
-              {
-                duration: 700,
-
-                easing:
-                  "cubic-bezier(.2,.8,.2,1)",
-
-                fill: "forwards"
-              }
-
-            );
-
-          }
-
-
-          /*
-           * Animate each scene only once.
-           */
-
-          copyObserver.unobserve(
-            entry.target
-          );
-
-        });
-
-      },
-
-      {
-        threshold: 0.18
-      }
-    );
-
-
-  scenes.forEach(scene => {
-
-    copyObserver.observe(
-      scene
-    );
-
+  $$(".reveal, .story-copy, .scene-copy").forEach(el => {
+    copyObserver.observe(el);
   });
 
 
@@ -407,226 +225,101 @@ window.addEventListener("load", () => {
      LIGHTBOX
      ======================================================= */
 
-  const lightbox =
-    $(".lightbox");
+  const lightbox = $(".lightbox");
+  const lightboxImage = $(".lightbox img");
+  const lightboxClose = $(".lightbox-close");
 
-  const lightboxImage =
-    $("#lightbox-img");
+  const galleryImages = $$(
+    ".story-grid img, .memory img, .photo img"
+  );
 
-  const lightboxTitle =
-    $("#lightbox-title");
+  function openLightbox(src, alt = "") {
 
+    if (!lightbox || !lightboxImage) return;
 
-  $$(".open-lightbox").forEach(button => {
+    lightboxImage.src = src;
+    lightboxImage.alt = alt;
 
-    button.addEventListener(
-      "click",
-      () => {
+    lightbox.classList.add("active");
+    document.body.classList.add("lightbox-open");
+  }
 
-        if (lightboxImage) {
+  function closeLightbox() {
 
-          lightboxImage.src =
-            button.dataset.img;
+    if (!lightbox) return;
 
-        }
+    lightbox.classList.remove("active");
+    document.body.classList.remove("lightbox-open");
+  }
 
+  galleryImages.forEach(img => {
 
-        if (lightboxTitle) {
+    img.addEventListener("click", () => {
+      openLightbox(img.currentSrc || img.src, img.alt);
+    });
 
-          lightboxTitle.textContent =
-            button.dataset.title ||
-            "our favourite frame";
+  });
 
-        }
+  if (lightboxClose) {
+    lightboxClose.addEventListener("click", closeLightbox);
+  }
 
+  if (lightbox) {
 
-        if (lightbox) {
+    lightbox.addEventListener("click", e => {
 
-          lightbox.classList.add(
-            "show"
-          );
-
-          lightbox.setAttribute(
-            "aria-hidden",
-            "false"
-          );
-
-        }
-
+      if (e.target === lightbox) {
+        closeLightbox();
       }
-    );
+
+    });
+
+  }
+
+  document.addEventListener("keydown", e => {
+
+    if (e.key === "Escape") {
+      closeLightbox();
+    }
 
   });
 
 
-  function closeLightbox() {
-
-    if (!lightbox) {
-      return;
-    }
-
-
-    lightbox.classList.remove(
-      "show"
-    );
-
-
-    lightbox.setAttribute(
-      "aria-hidden",
-      "true"
-    );
-
-  }
-
-
-  const closeButton =
-    $(".close-lightbox");
-
-
-  if (closeButton) {
-
-    closeButton.addEventListener(
-      "click",
-      closeLightbox
-    );
-
-  }
-
-
-  if (lightbox) {
-
-    lightbox.addEventListener(
-      "click",
-      event => {
-
-        if (
-          event.target ===
-          lightbox
-        ) {
-
-          closeLightbox();
-
-        }
-
-      }
-    );
-
-  }
-
-
-  window.addEventListener(
-    "keydown",
-    event => {
-
-      if (event.key === "Escape") {
-
-        closeLightbox();
-
-      }
-
-    }
-  );
-
-
   /* =======================================================
-     LIGHT / DARK MODE
+     THEME / DARK MODE
      ======================================================= */
 
   const themeToggle =
-    $("#themeToggle");
-
-  const themeColor =
-    $("#themeColor");
+    $(".theme-toggle") ||
+    $(".theme-switch") ||
+    $('[data-theme-toggle]');
 
   const savedTheme =
-    localStorage.getItem(
-      "vr-theme"
-    );
+    localStorage.getItem("vem-theme");
 
-
-  function setTheme(dark) {
-
-    document.body.classList.toggle(
-      "dark-mode",
-      dark
-    );
-
-
-    if (themeToggle) {
-
-      themeToggle.setAttribute(
-        "aria-pressed",
-        String(dark)
-      );
-
-
-      themeToggle.setAttribute(
-        "aria-label",
-
-        dark
-          ? "Switch to light mode"
-          : "Switch to dark mode"
-      );
-
-    }
-
-
-    const toggleLabel =
-      $(".toggle-label");
-
-
-    if (toggleLabel) {
-
-      toggleLabel.textContent =
-        dark
-          ? "light"
-          : "dark";
-
-    }
-
-
-    if (themeColor) {
-
-      themeColor.content =
-        dark
-          ? "#100910"
-          : "#f7e7e2";
-
-    }
-
-
-    localStorage.setItem(
-      "vr-theme",
-
-      dark
-        ? "dark"
-        : "light"
-    );
-
+  if (savedTheme === "dark") {
+    document.documentElement.classList.add("dark");
   }
 
-
-  /* Apply saved theme */
-
-  setTheme(
-    savedTheme === "dark"
-  );
-
+  if (savedTheme === "light") {
+    document.documentElement.classList.remove("dark");
+  }
 
   if (themeToggle) {
 
-    themeToggle.addEventListener(
-      "click",
-      () => {
+    themeToggle.addEventListener("click", () => {
 
-        setTheme(
-          !document.body.classList.contains(
-            "dark-mode"
-          )
-        );
+      document.documentElement.classList.toggle("dark");
 
-      }
-    );
+      const isDark =
+        document.documentElement.classList.contains("dark");
+
+      localStorage.setItem(
+        "vem-theme",
+        isDark ? "dark" : "light"
+      );
+
+    });
 
   }
 
@@ -635,70 +328,105 @@ window.addEventListener("load", () => {
      AMBIENT MODE
      ======================================================= */
 
-  const sound =
-    $("#sound");
+  const ambientButton =
+    $(".ambient-toggle") ||
+    $('[data-ambient]');
 
-  let ambient = false;
-  let ambientTimer = null;
+  if (ambientButton) {
 
+    ambientButton.addEventListener("click", () => {
 
-  if (sound) {
+      document.body.classList.toggle("ambient");
 
-    sound.addEventListener(
-      "click",
-      event => {
+      const active =
+        document.body.classList.contains("ambient");
 
-        ambient =
-          !ambient;
+      localStorage.setItem(
+        "vem-ambient",
+        active ? "1" : "0"
+      );
 
-
-        event.currentTarget.textContent =
-          ambient
-            ? "✦"
-            : "♫";
-
-
-        /*
-         * Use a CSS class instead of applying
-         * a filter to the entire page.
-         */
-
-        document.body.classList.toggle(
-          "ambient-mode",
-          ambient
-        );
-
-
-        if (ambientTimer) {
-
-          clearInterval(
-            ambientTimer
-          );
-
-          ambientTimer = null;
-        }
-
-
-        if (ambient) {
-
-          ambientTimer =
-            setInterval(
-              () => {
-
-                document.documentElement.style.setProperty(
-                  "--pulse",
-                  Math.random() * 0.04
-                );
-
-              },
-              1600
-            );
-
-        }
-
-      }
-    );
+    });
 
   }
 
-});
+  if (localStorage.getItem("vem-ambient") === "1") {
+    document.body.classList.add("ambient");
+  }
+
+
+  /* =======================================================
+     VIDEO
+     ======================================================= */
+
+  const video = $(".quote-video");
+
+  if (video) {
+
+    // Make sure video doesn't block page interaction
+    video.setAttribute("playsinline", "");
+    video.setAttribute("muted", "");
+
+    // Try playing after page is ready
+    const tryPlay = () => {
+
+      const promise = video.play();
+
+      if (promise && promise.catch) {
+        promise.catch(() => {
+          // Autoplay can be blocked by some browsers.
+          // Poster image will remain visible.
+        });
+      }
+
+    };
+
+    setTimeout(tryPlay, 300);
+  }
+
+
+  /* =======================================================
+     IMAGE PERFORMANCE
+     ======================================================= */
+
+  const allImages = $$("img");
+
+  allImages.forEach((img, index) => {
+
+    // First few visible images should load normally
+    if (index > 2 && !img.hasAttribute("loading")) {
+      img.loading = "lazy";
+    }
+
+    if (!img.hasAttribute("decoding")) {
+      img.decoding = "async";
+    }
+
+  });
+
+
+  /* =======================================================
+     PAGE READY
+     ======================================================= */
+
+  document.documentElement.classList.add("app-ready");
+}
+
+
+/* =========================================================
+   START APP WITHOUT WAITING FOR VIDEO / IMAGES
+   ========================================================= */
+
+if (document.readyState === "loading") {
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    initApp,
+    { once: true }
+  );
+
+} else {
+
+  initApp();
+
+}
