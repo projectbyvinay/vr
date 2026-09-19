@@ -428,18 +428,11 @@ body.dark-mode .toggle-thumb{
 
 /* cinematic vignette */
 
+/* cinematic vignette */
+
 .hero-vignette{
   position:absolute;
-
   inset:0;
-
-  z-index:1;
-
- .hero-vignette{
-  position:absolute;
-
-  inset:0;
-
   z-index:1;
 
   background:
@@ -449,7 +442,6 @@ body.dark-mode .toggle-thumb{
       rgba(25,0,25,.28) 100%
     );
 }
-
 
 /* subtle palette shapes */
 
