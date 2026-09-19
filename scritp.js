@@ -3,13 +3,16 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
 
 /* =========================================================
-   START APP
+   START WEBSITE
    ========================================================= */
 
-function startWebsite() {
+window.addEventListener("load", () => {
 
   /* =======================================================
      LOADER
+     
+     Maximum visible time: 1 second.
+     It does NOT wait for anything else after page load.
      ======================================================= */
 
   const loader = $(".loader");
@@ -21,14 +24,13 @@ function startWebsite() {
       loaderBar.style.width = "100%";
     }
 
-    /*
-     * Give the page a short moment to render,
-     * then hide the loader.
-     */
-
     setTimeout(() => {
 
+      loader.style.transition =
+        "opacity 0.2s ease";
+
       loader.style.opacity = "0";
+
       loader.style.pointerEvents = "none";
 
       setTimeout(() => {
@@ -37,14 +39,16 @@ function startWebsite() {
           loader.remove();
         }
 
-      }, 500);
+      }, 200);
 
-    }, 700);
+    }, 800);
   }
 
 
   /* =======================================================
      FLOATING HEARTS
+     
+     Reduced from 34 to 14 for smoother scrolling.
      ======================================================= */
 
   const hearts = $(".global-hearts");
@@ -53,12 +57,15 @@ function startWebsite() {
 
     for (let i = 0; i < 14; i++) {
 
-      const heart = document.createElement("span");
+      const heart =
+        document.createElement("span");
 
       heart.className = "heart";
 
       heart.textContent =
-        Math.random() > 0.28 ? "♡" : "♥";
+        Math.random() > 0.28
+          ? "♡"
+          : "♥";
 
       heart.style.left =
         Math.random() * 100 + "%";
@@ -108,7 +115,9 @@ function startWebsite() {
 
 
   /* =======================================================
-     SCROLL / PARALLAX
+     SCROLL PROGRESS + CHAPTER + PARALLAX
+     
+     One requestAnimationFrame loop handles everything.
      ======================================================= */
 
   const progress =
@@ -125,6 +134,10 @@ function startWebsite() {
 
   function updateScroll() {
 
+    /* -----------------------------------------------------
+       Scroll progress
+       ----------------------------------------------------- */
+
     const max =
       Math.max(
         1,
@@ -132,8 +145,6 @@ function startWebsite() {
         window.innerHeight
       );
 
-
-    /* Scroll progress */
 
     if (progress) {
 
@@ -146,8 +157,16 @@ function startWebsite() {
     }
 
 
+    /* -----------------------------------------------------
+       Active chapter
+       ----------------------------------------------------- */
+
     let active = "01";
 
+
+    /* -----------------------------------------------------
+       Scene parallax
+       ----------------------------------------------------- */
 
     scenes.forEach(scene => {
 
@@ -156,58 +175,66 @@ function startWebsite() {
 
 
       /*
-       * Only calculate parallax when the scene
-       * is close to the screen.
+       * Only calculate expensive effects for scenes
+       * close to the viewport.
        */
 
       const near =
-        rect.bottom > -window.innerHeight * 0.25 &&
-        rect.top < window.innerHeight * 1.25;
+        rect.bottom >
+          -window.innerHeight * 0.25 &&
+        rect.top <
+          window.innerHeight * 1.25;
 
 
-      if (near) {
+      if (!near) {
 
-        scene.classList.add("is-near");
+        scene.classList.remove(
+          "is-near"
+        );
 
-
-        /* Chapter */
-
-        if (
-          rect.top < window.innerHeight * 0.58 &&
-          rect.bottom > window.innerHeight * 0.38
-        ) {
-
-          active =
-            scene.dataset.index || "01";
-
-        }
+        return;
+      }
 
 
-        /* Image parallax */
-
-        const photo =
-          scene.querySelector(".photo");
-
-
-        if (photo) {
-
-          const n =
-            (window.innerHeight - rect.top) /
-            (window.innerHeight + rect.height);
+      scene.classList.add(
+        "is-near"
+      );
 
 
-          const movement =
-            (n - 0.5) * 36;
+      /* Active chapter detection */
+
+      if (
+        rect.top <
+          window.innerHeight * 0.58 &&
+        rect.bottom >
+          window.innerHeight * 0.38
+      ) {
+
+        active =
+          scene.dataset.index || "01";
+
+      }
 
 
-          photo.style.transform =
-            `scale(1.045) translate3d(0, ${movement}px, 0)`;
+      /* Image parallax */
 
-        }
+      const photo =
+        scene.querySelector(".photo");
 
-      } else {
 
-        scene.classList.remove("is-near");
+      if (photo) {
+
+        const n =
+          (window.innerHeight - rect.top) /
+          (window.innerHeight + rect.height);
+
+
+        const movement =
+          (n - 0.5) * 36;
+
+
+        photo.style.transform =
+          `scale(1.045) translate3d(0, ${movement}px, 0)`;
 
       }
 
@@ -255,121 +282,125 @@ function startWebsite() {
   );
 
 
-  /*
-   * Initial calculation
-   */
+  /* Initial calculation */
 
   updateScroll();
 
 
   /* =======================================================
-     SCENE OBSERVER
+     SCENE VISIBILITY OBSERVER
      ======================================================= */
 
-  if ("IntersectionObserver" in window) {
+  const sceneObserver =
+    new IntersectionObserver(
+      entries => {
 
-    const sceneObserver =
-      new IntersectionObserver(
-        entries => {
+        entries.forEach(entry => {
 
-          entries.forEach(entry => {
+          entry.target.classList.toggle(
+            "is-visible",
+            entry.isIntersecting
+          );
 
-            entry.target.classList.toggle(
-              "is-visible",
-              entry.isIntersecting
-            );
+        });
 
-          });
+      },
+      {
+        rootMargin:
+          "20% 0px 20% 0px",
 
-        },
-        {
-          rootMargin: "20% 0px 20% 0px",
-          threshold: 0
-        }
-      );
+        threshold: 0
+      }
+    );
 
 
-    scenes.forEach(scene => {
+  scenes.forEach(scene => {
 
-      sceneObserver.observe(scene);
+    sceneObserver.observe(
+      scene
+    );
 
-    });
-
-  }
+  });
 
 
   /* =======================================================
-     TEXT REVEAL
+     SCENE TEXT REVEAL
      ======================================================= */
 
-  if ("IntersectionObserver" in window) {
+  const copyObserver =
+    new IntersectionObserver(
+      entries => {
 
-    const copyObserver =
-      new IntersectionObserver(
-        entries => {
+        entries.forEach(entry => {
 
-          entries.forEach(entry => {
-
-            if (!entry.isIntersecting) {
-              return;
-            }
+          if (!entry.isIntersecting) {
+            return;
+          }
 
 
-            const copy =
-              entry.target.querySelector(
-                ".scene-copy"
-              );
-
-
-            if (copy) {
-
-              copy.animate(
-                [
-                  {
-                    opacity: 0,
-                    transform:
-                      "translateY(35px)"
-                  },
-
-                  {
-                    opacity: 1,
-                    transform:
-                      "translateY(0)"
-                  }
-                ],
-
-                {
-                  duration: 700,
-                  easing:
-                    "cubic-bezier(.2,.8,.2,1)",
-                  fill: "forwards"
-                }
-              );
-
-            }
-
-
-            copyObserver.unobserve(
-              entry.target
+          const copy =
+            entry.target.querySelector(
+              ".scene-copy"
             );
 
-          });
 
-        },
+          if (copy) {
 
-        {
-          threshold: 0.18
-        }
-      );
+            copy.animate(
+
+              [
+                {
+                  opacity: 0,
+                  transform:
+                    "translateY(35px)"
+                },
+
+                {
+                  opacity: 1,
+                  transform:
+                    "translateY(0)"
+                }
+              ],
+
+              {
+                duration: 700,
+
+                easing:
+                  "cubic-bezier(.2,.8,.2,1)",
+
+                fill: "forwards"
+              }
+
+            );
+
+          }
 
 
-    scenes.forEach(scene => {
+          /*
+           * Animate each scene only once.
+           */
 
-      copyObserver.observe(scene);
+          copyObserver.unobserve(
+            entry.target
+          );
 
-    });
+        });
 
-  }
+      },
+
+      {
+        threshold: 0.18
+      }
+    );
+
+
+  scenes.forEach(scene => {
+
+    copyObserver.observe(
+      scene
+    );
+
+  });
 
 
   /* =======================================================
@@ -411,7 +442,9 @@ function startWebsite() {
 
         if (lightbox) {
 
-          lightbox.classList.add("show");
+          lightbox.classList.add(
+            "show"
+          );
 
           lightbox.setAttribute(
             "aria-hidden",
@@ -466,7 +499,10 @@ function startWebsite() {
       "click",
       event => {
 
-        if (event.target === lightbox) {
+        if (
+          event.target ===
+          lightbox
+        ) {
 
           closeLightbox();
 
@@ -493,7 +529,7 @@ function startWebsite() {
 
 
   /* =======================================================
-     DARK / LIGHT MODE
+     LIGHT / DARK MODE
      ======================================================= */
 
   const themeToggle =
@@ -526,6 +562,7 @@ function startWebsite() {
 
       themeToggle.setAttribute(
         "aria-label",
+
         dark
           ? "Switch to light mode"
           : "Switch to dark mode"
@@ -560,6 +597,7 @@ function startWebsite() {
 
     localStorage.setItem(
       "vr-theme",
+
       dark
         ? "dark"
         : "light"
@@ -567,6 +605,8 @@ function startWebsite() {
 
   }
 
+
+  /* Apply saved theme */
 
   setTheme(
     savedTheme === "dark"
@@ -595,17 +635,16 @@ function startWebsite() {
      AMBIENT MODE
      ======================================================= */
 
-  const soundButton =
+  const sound =
     $("#sound");
 
   let ambient = false;
-
   let ambientTimer = null;
 
 
-  if (soundButton) {
+  if (sound) {
 
-    soundButton.addEventListener(
+    sound.addEventListener(
       "click",
       event => {
 
@@ -619,6 +658,11 @@ function startWebsite() {
             : "♫";
 
 
+        /*
+         * Use a CSS class instead of applying
+         * a filter to the entire page.
+         */
+
         document.body.classList.toggle(
           "ambient-mode",
           ambient
@@ -631,6 +675,7 @@ function startWebsite() {
             ambientTimer
           );
 
+          ambientTimer = null;
         }
 
 
@@ -656,66 +701,4 @@ function startWebsite() {
 
   }
 
-}
-
-
-/* =========================================================
-   START SAFELY
-   ========================================================= */
-
-/*
- * IMPORTANT:
- *
- * We do NOT wait for window "load".
- *
- * This means a slow/broken video or image can never
- * keep the loading screen stuck forever.
- */
-
-if (
-  document.readyState === "loading"
-) {
-
-  document.addEventListener(
-    "DOMContentLoaded",
-    startWebsite,
-    { once: true }
-  );
-
-} else {
-
-  startWebsite();
-
-}
-
-
-/* =========================================================
-   EMERGENCY LOADER FAILSAFE
-   ========================================================= */
-
-/*
- * Even if another JavaScript error happens later,
- * the loader will disappear after 3 seconds.
- */
-
-setTimeout(() => {
-
-  const loader =
-    document.querySelector(".loader");
-
-  if (loader) {
-
-    loader.style.opacity = "0";
-    loader.style.pointerEvents = "none";
-
-    setTimeout(() => {
-
-      if (loader && loader.parentNode) {
-        loader.remove();
-      }
-
-    }, 500);
-
-  }
-
-}, 3000);
+});
