@@ -1,113 +1,168 @@
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
-window.addEventListener("load", () => {
+
+/* =========================================================
+   START APP
+   ========================================================= */
+
+function startWebsite() {
+
+  /* =======================================================
+     LOADER
+     ======================================================= */
+
   const loader = $(".loader");
-  const bar = $(".loader-bar i");
+  const loaderBar = $(".loader-bar i");
 
-  setTimeout(() => {
-    if (bar) bar.style.width = "100%";
-  }, 80);
+  if (loader) {
 
-  setTimeout(() => {
-    if (loader) {
-      loader.style.opacity = "0";
-      setTimeout(() => loader.remove(), 650);
+    if (loaderBar) {
+      loaderBar.style.width = "100%";
     }
-  }, 1250);
+
+    /*
+     * Give the page a short moment to render,
+     * then hide the loader.
+     */
+
+    setTimeout(() => {
+
+      loader.style.opacity = "0";
+      loader.style.pointerEvents = "none";
+
+      setTimeout(() => {
+
+        if (loader && loader.parentNode) {
+          loader.remove();
+        }
+
+      }, 500);
+
+    }, 700);
+  }
 
 
-  /* =========================================================
+  /* =======================================================
      FLOATING HEARTS
-     Reduced from 34 → 14 for smoother mobile scrolling
-     ========================================================= */
+     ======================================================= */
 
   const hearts = $(".global-hearts");
 
   if (hearts) {
+
     for (let i = 0; i < 14; i++) {
-      const h = document.createElement("span");
 
-      h.className = "heart";
-      h.textContent = Math.random() > 0.28 ? "♡" : "♥";
+      const heart = document.createElement("span");
 
-      h.style.left = Math.random() * 100 + "%";
-      h.style.fontSize = 9 + Math.random() * 19 + "px";
-      h.style.animationDuration = 8 + Math.random() * 11 + "s";
-      h.style.animationDelay = -Math.random() * 15 + "s";
+      heart.className = "heart";
 
-      h.style.setProperty(
+      heart.textContent =
+        Math.random() > 0.28 ? "♡" : "♥";
+
+      heart.style.left =
+        Math.random() * 100 + "%";
+
+      heart.style.fontSize =
+        9 + Math.random() * 19 + "px";
+
+      heart.style.animationDuration =
+        8 + Math.random() * 11 + "s";
+
+      heart.style.animationDelay =
+        -Math.random() * 15 + "s";
+
+      heart.style.setProperty(
         "--drift",
         Math.random() * 180 - 90 + "px"
       );
 
-      hearts.appendChild(h);
+      hearts.appendChild(heart);
     }
   }
 
 
-  /* =========================================================
+  /* =======================================================
      SCROLL BUTTONS
-     ========================================================= */
+     ======================================================= */
 
   $$("[data-scroll]").forEach(button => {
+
     button.addEventListener("click", () => {
-      const target = $(button.dataset.scroll);
+
+      const target =
+        $(button.dataset.scroll);
 
       if (target) {
+
         target.scrollIntoView({
           behavior: "smooth",
           block: "start"
         });
+
       }
+
     });
+
   });
 
 
-  /* =========================================================
-     SCROLL PROGRESS + CHAPTER + PARALLAX
-     
-     Everything is handled inside ONE animation frame loop.
-     This is much lighter than having multiple scroll handlers.
-     ========================================================= */
+  /* =======================================================
+     SCROLL / PARALLAX
+     ======================================================= */
 
-  const progress = $(".scroll-progress i");
-  const chapter = $("#chapter");
-  const scenes = $$(".scene");
+  const progress =
+    $(".scroll-progress i");
+
+  const chapter =
+    $("#chapter");
+
+  const scenes =
+    $$(".scene");
 
   let ticking = false;
 
+
   function updateScroll() {
 
-    /* ---------- Scroll progress ---------- */
+    const max =
+      Math.max(
+        1,
+        document.documentElement.scrollHeight -
+        window.innerHeight
+      );
 
-    const max = Math.max(
-      1,
-      document.documentElement.scrollHeight - innerHeight
-    );
+
+    /* Scroll progress */
 
     if (progress) {
+
       progress.style.width =
-        Math.min(100, scrollY / max * 100) + "%";
+        Math.min(
+          100,
+          window.scrollY / max * 100
+        ) + "%";
+
     }
 
 
-    /* ---------- Active chapter + parallax ---------- */
-
     let active = "01";
+
 
     scenes.forEach(scene => {
 
-      const rect = scene.getBoundingClientRect();
+      const rect =
+        scene.getBoundingClientRect();
+
 
       /*
-       * Only perform expensive work on scenes that are close
-       * to the viewport.
+       * Only calculate parallax when the scene
+       * is close to the screen.
        */
 
       const near =
-        rect.bottom > -innerHeight * 0.25 &&
-        rect.top < innerHeight * 1.25;
+        rect.bottom > -window.innerHeight * 0.25 &&
+        rect.top < window.innerHeight * 1.25;
 
 
       if (near) {
@@ -115,43 +170,57 @@ window.addEventListener("load", () => {
         scene.classList.add("is-near");
 
 
-        /* ---------- Active chapter ---------- */
+        /* Chapter */
 
         if (
-          rect.top < innerHeight * 0.58 &&
-          rect.bottom > innerHeight * 0.38
+          rect.top < window.innerHeight * 0.58 &&
+          rect.bottom > window.innerHeight * 0.38
         ) {
-          active = scene.dataset.index;
+
+          active =
+            scene.dataset.index || "01";
+
         }
 
 
-        /* ---------- Image parallax ---------- */
+        /* Image parallax */
 
-        const photo = scene.querySelector(".photo");
+        const photo =
+          scene.querySelector(".photo");
+
 
         if (photo) {
 
           const n =
-            (innerHeight - rect.top) /
-            (innerHeight + rect.height);
+            (window.innerHeight - rect.top) /
+            (window.innerHeight + rect.height);
+
 
           const movement =
             (n - 0.5) * 36;
 
+
           photo.style.transform =
             `scale(1.045) translate3d(0, ${movement}px, 0)`;
+
         }
 
       } else {
 
         scene.classList.remove("is-near");
+
       }
+
     });
 
 
     if (chapter) {
-      chapter.textContent = active + " / 05";
+
+      chapter.textContent =
+        active + " / 05";
+
     }
+
 
     ticking = false;
   }
@@ -163,186 +232,244 @@ window.addEventListener("load", () => {
 
       ticking = true;
 
-      requestAnimationFrame(updateScroll);
+      requestAnimationFrame(
+        updateScroll
+      );
+
     }
+
   }
 
 
-  addEventListener(
+  window.addEventListener(
     "scroll",
     requestScrollUpdate,
     { passive: true }
   );
 
-  addEventListener(
+
+  window.addEventListener(
     "resize",
     requestScrollUpdate,
     { passive: true }
   );
 
 
-  /* Initial update */
+  /*
+   * Initial calculation
+   */
+
   updateScroll();
 
 
-  /* =========================================================
-     SCENE VISIBILITY OBSERVER
-     ========================================================= */
+  /* =======================================================
+     SCENE OBSERVER
+     ======================================================= */
 
-  const sceneObserver =
-    new IntersectionObserver(
-      entries => {
+  if ("IntersectionObserver" in window) {
 
-        entries.forEach(entry => {
+    const sceneObserver =
+      new IntersectionObserver(
+        entries => {
 
-          entry.target.classList.toggle(
-            "is-visible",
-            entry.isIntersecting
-          );
+          entries.forEach(entry => {
 
-        });
-
-      },
-      {
-        rootMargin: "20% 0px 20% 0px",
-        threshold: 0
-      }
-    );
-
-
-  scenes.forEach(scene => {
-    sceneObserver.observe(scene);
-  });
-
-
-  /* =========================================================
-     TEXT / CONTENT REVEAL ANIMATION
-     ========================================================= */
-
-  const copyObserver =
-    new IntersectionObserver(
-      entries => {
-
-        entries.forEach(entry => {
-
-          if (!entry.isIntersecting) return;
-
-          const copy =
-            entry.target.querySelector(".scene-copy");
-
-          if (copy) {
-
-            copy.animate(
-              [
-                {
-                  opacity: 0,
-                  transform: "translateY(35px)"
-                },
-                {
-                  opacity: 1,
-                  transform: "translateY(0)"
-                }
-              ],
-              {
-                duration: 700,
-                easing: "cubic-bezier(.2,.8,.2,1)",
-                fill: "forwards"
-              }
+            entry.target.classList.toggle(
+              "is-visible",
+              entry.isIntersecting
             );
-          }
+
+          });
+
+        },
+        {
+          rootMargin: "20% 0px 20% 0px",
+          threshold: 0
+        }
+      );
 
 
-          /*
-           * Once the animation has happened, stop observing
-           * this scene so the browser has less work to do.
-           */
+    scenes.forEach(scene => {
 
-          copyObserver.unobserve(entry.target);
+      sceneObserver.observe(scene);
 
-        });
+    });
 
-      },
-      {
-        threshold: 0.18
-      }
-    );
+  }
 
 
-  scenes.forEach(scene => {
-    copyObserver.observe(scene);
-  });
+  /* =======================================================
+     TEXT REVEAL
+     ======================================================= */
+
+  if ("IntersectionObserver" in window) {
+
+    const copyObserver =
+      new IntersectionObserver(
+        entries => {
+
+          entries.forEach(entry => {
+
+            if (!entry.isIntersecting) {
+              return;
+            }
 
 
-  /* =========================================================
+            const copy =
+              entry.target.querySelector(
+                ".scene-copy"
+              );
+
+
+            if (copy) {
+
+              copy.animate(
+                [
+                  {
+                    opacity: 0,
+                    transform:
+                      "translateY(35px)"
+                  },
+
+                  {
+                    opacity: 1,
+                    transform:
+                      "translateY(0)"
+                  }
+                ],
+
+                {
+                  duration: 700,
+                  easing:
+                    "cubic-bezier(.2,.8,.2,1)",
+                  fill: "forwards"
+                }
+              );
+
+            }
+
+
+            copyObserver.unobserve(
+              entry.target
+            );
+
+          });
+
+        },
+
+        {
+          threshold: 0.18
+        }
+      );
+
+
+    scenes.forEach(scene => {
+
+      copyObserver.observe(scene);
+
+    });
+
+  }
+
+
+  /* =======================================================
      LIGHTBOX
-     ========================================================= */
+     ======================================================= */
 
-  const light = $(".lightbox");
-  const lightboxImage = $("#lightbox-img");
-  const lightboxTitle = $("#lightbox-title");
+  const lightbox =
+    $(".lightbox");
+
+  const lightboxImage =
+    $("#lightbox-img");
+
+  const lightboxTitle =
+    $("#lightbox-title");
 
 
   $$(".open-lightbox").forEach(button => {
 
-    button.addEventListener("click", () => {
+    button.addEventListener(
+      "click",
+      () => {
 
-      if (lightboxImage) {
-        lightboxImage.src = button.dataset.img;
+        if (lightboxImage) {
+
+          lightboxImage.src =
+            button.dataset.img;
+
+        }
+
+
+        if (lightboxTitle) {
+
+          lightboxTitle.textContent =
+            button.dataset.title ||
+            "our favourite frame";
+
+        }
+
+
+        if (lightbox) {
+
+          lightbox.classList.add("show");
+
+          lightbox.setAttribute(
+            "aria-hidden",
+            "false"
+          );
+
+        }
+
       }
-
-      if (lightboxTitle) {
-        lightboxTitle.textContent =
-          button.dataset.title ||
-          "our favourite frame";
-      }
-
-      if (light) {
-
-        light.classList.add("show");
-
-        light.setAttribute(
-          "aria-hidden",
-          "false"
-        );
-      }
-
-    });
+    );
 
   });
 
 
   function closeLightbox() {
 
-    if (!light) return;
+    if (!lightbox) {
+      return;
+    }
 
-    light.classList.remove("show");
 
-    light.setAttribute(
+    lightbox.classList.remove(
+      "show"
+    );
+
+
+    lightbox.setAttribute(
       "aria-hidden",
       "true"
     );
+
   }
 
 
   const closeButton =
     $(".close-lightbox");
 
+
   if (closeButton) {
+
     closeButton.addEventListener(
       "click",
       closeLightbox
     );
+
   }
 
 
-  if (light) {
+  if (lightbox) {
 
-    light.addEventListener(
+    lightbox.addEventListener(
       "click",
       event => {
 
-        if (event.target === light) {
+        if (event.target === lightbox) {
+
           closeLightbox();
+
         }
 
       }
@@ -351,27 +478,34 @@ window.addEventListener("load", () => {
   }
 
 
-  addEventListener(
+  window.addEventListener(
     "keydown",
     event => {
 
       if (event.key === "Escape") {
+
         closeLightbox();
+
       }
 
     }
   );
 
 
-  /* =========================================================
-     LIGHT / DARK MODE
-     ========================================================= */
+  /* =======================================================
+     DARK / LIGHT MODE
+     ======================================================= */
 
-  const toggle = $("#themeToggle");
-  const themeColor = $("#themeColor");
+  const themeToggle =
+    $("#themeToggle");
+
+  const themeColor =
+    $("#themeColor");
 
   const savedTheme =
-    localStorage.getItem("vr-theme");
+    localStorage.getItem(
+      "vr-theme"
+    );
 
 
   function setTheme(dark) {
@@ -382,28 +516,35 @@ window.addEventListener("load", () => {
     );
 
 
-    if (toggle) {
+    if (themeToggle) {
 
-      toggle.setAttribute(
+      themeToggle.setAttribute(
         "aria-pressed",
         String(dark)
       );
 
-      toggle.setAttribute(
+
+      themeToggle.setAttribute(
         "aria-label",
         dark
           ? "Switch to light mode"
           : "Switch to dark mode"
       );
+
     }
 
 
-    const label =
+    const toggleLabel =
       $(".toggle-label");
 
-    if (label) {
-      label.textContent =
-        dark ? "light" : "dark";
+
+    if (toggleLabel) {
+
+      toggleLabel.textContent =
+        dark
+          ? "light"
+          : "dark";
+
     }
 
 
@@ -413,22 +554,28 @@ window.addEventListener("load", () => {
         dark
           ? "#100910"
           : "#f7e7e2";
+
     }
 
 
     localStorage.setItem(
       "vr-theme",
-      dark ? "dark" : "light"
+      dark
+        ? "dark"
+        : "light"
     );
+
   }
 
 
-  setTheme(savedTheme === "dark");
+  setTheme(
+    savedTheme === "dark"
+  );
 
 
-  if (toggle) {
+  if (themeToggle) {
 
-    toggle.addEventListener(
+    themeToggle.addEventListener(
       "click",
       () => {
 
@@ -444,19 +591,16 @@ window.addEventListener("load", () => {
   }
 
 
-  /* =========================================================
+  /* =======================================================
      AMBIENT MODE
-     
-     Important:
-     We no longer apply a filter to the entire body.
-     That caused expensive full-page repaints on mobile.
-     ========================================================= */
+     ======================================================= */
+
+  const soundButton =
+    $("#sound");
 
   let ambient = false;
-  let timer;
 
-
-  const soundButton = $("#sound");
+  let ambientTimer = null;
 
 
   if (soundButton) {
@@ -465,20 +609,15 @@ window.addEventListener("load", () => {
       "click",
       event => {
 
-        ambient = !ambient;
+        ambient =
+          !ambient;
 
 
         event.currentTarget.textContent =
-          ambient ? "✦" : "♫";
+          ambient
+            ? "✦"
+            : "♫";
 
-
-        /*
-         * CSS can use:
-         *
-         * body.ambient-mode
-         *
-         * instead of applying a filter to the whole page.
-         */
 
         document.body.classList.toggle(
           "ambient-mode",
@@ -486,19 +625,29 @@ window.addEventListener("load", () => {
         );
 
 
-        clearInterval(timer);
+        if (ambientTimer) {
+
+          clearInterval(
+            ambientTimer
+          );
+
+        }
 
 
         if (ambient) {
 
-          timer = setInterval(() => {
+          ambientTimer =
+            setInterval(
+              () => {
 
-            document.documentElement.style.setProperty(
-              "--pulse",
-              Math.random() * 0.04
+                document.documentElement.style.setProperty(
+                  "--pulse",
+                  Math.random() * 0.04
+                );
+
+              },
+              1600
             );
-
-          }, 1600);
 
         }
 
@@ -507,4 +656,66 @@ window.addEventListener("load", () => {
 
   }
 
-});
+}
+
+
+/* =========================================================
+   START SAFELY
+   ========================================================= */
+
+/*
+ * IMPORTANT:
+ *
+ * We do NOT wait for window "load".
+ *
+ * This means a slow/broken video or image can never
+ * keep the loading screen stuck forever.
+ */
+
+if (
+  document.readyState === "loading"
+) {
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    startWebsite,
+    { once: true }
+  );
+
+} else {
+
+  startWebsite();
+
+}
+
+
+/* =========================================================
+   EMERGENCY LOADER FAILSAFE
+   ========================================================= */
+
+/*
+ * Even if another JavaScript error happens later,
+ * the loader will disappear after 3 seconds.
+ */
+
+setTimeout(() => {
+
+  const loader =
+    document.querySelector(".loader");
+
+  if (loader) {
+
+    loader.style.opacity = "0";
+    loader.style.pointerEvents = "none";
+
+    setTimeout(() => {
+
+      if (loader && loader.parentNode) {
+        loader.remove();
+      }
+
+    }, 500);
+
+  }
+
+}, 3000);
