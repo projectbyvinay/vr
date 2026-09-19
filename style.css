@@ -419,9 +419,9 @@ body.dark-mode .toggle-thumb{
   background:
     linear-gradient(
       180deg,
-      rgba(25,0,25,.24),
-      rgba(25,0,25,.40) 42%,
-      rgba(25,0,25,.82)
+      rgba(25,0,25,.10),
+      rgba(25,0,25,.18) 42%,
+      rgba(25,0,25,.48)
     );
 }
 
@@ -435,11 +435,12 @@ body.dark-mode .toggle-thumb{
 
   z-index:1;
 
+  .hero-vignette{
   background:
     radial-gradient(
       circle at center,
-      transparent 15%,
-      rgba(25,0,25,.58) 100%
+      transparent 30%,
+      rgba(25,0,25,.28) 100%
     );
 }
 
@@ -796,9 +797,9 @@ body.dark-mode .toggle-thumb{
   background:
     linear-gradient(
       90deg,
-      rgba(25,0,25,.80),
-      rgba(25,0,25,.20) 62%,
-      rgba(25,0,25,.42)
+      rgba(25,0,25,.48),
+      rgba(25,0,25,.10) 58%,
+      rgba(25,0,25,.18)
     );
 }
 
@@ -807,9 +808,9 @@ body.dark-mode .toggle-thumb{
   background:
     linear-gradient(
       270deg,
-      rgba(25,0,25,.82),
-      rgba(25,0,25,.20) 62%,
-      rgba(25,0,25,.42)
+      rgba(25,0,25,.48),
+      rgba(25,0,25,.10) 58%,
+      rgba(25,0,25,.18)
     );
 }
 
@@ -1714,8 +1715,8 @@ body.dark-mode .candle-layer{
     background:
       linear-gradient(
         180deg,
-        rgba(25,0,25,.28),
-        rgba(25,0,25,.76)
+        rgba(25,0,25,.12),
+        rgba(25,0,25,.54)
       );
   }
 
@@ -1724,8 +1725,8 @@ body.dark-mode .candle-layer{
     background:
       linear-gradient(
         180deg,
-        rgba(25,0,25,.28),
-        rgba(25,0,25,.76)
+        rgba(25,0,25,.12),
+        rgba(25,0,25,.54)
       );
   }
 
