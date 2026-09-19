@@ -44,7 +44,7 @@ function initApp() {
   const heartLayer = $(".hearts");
 
   if (heartLayer) {
-    const heartCount = 10;
+    const heartCount = 0;
 
     for (let i = 0; i < heartCount; i++) {
       const heart = document.createElement("span");
